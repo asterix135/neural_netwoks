@@ -15,12 +15,21 @@ BIG_TRAIN = 'train.csv'
 
 class SimpleNetwork:
     """
-    Class to keep and update layer information on pixel
+    Class to keep and update weights for a particular digit representation
     """
-    def __init__(self, width, length):
+    def __init__(self, width, length, value):
         self._width = width
         self._length = length
-        # TODO: initialize array of random values matching image size
+        self._value = value
+        self._array = np.random.randn(width, length)
+
+    def update_vals(self, update_array):
+        self._array += update_array
+
+    def __str__(self):
+        pass
+
+
 
 
 def load_big_images():
@@ -32,10 +41,18 @@ def load_small_images():
 
 
 def show_digit():
+    """
+    Create graphic representation of pixel array
+    :return:
+    """
     pass
 
 
 def analyze_pictures():
+    """
+    Main wrapper routine
+    :return:
+    """
     pass
 
 
