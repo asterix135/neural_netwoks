@@ -5,13 +5,12 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+# import matplotlib.image as mpimg
 
 
-SMALL_FILE_PATH = '/Users/christophergraham/Documents/School/Ryerson_program/CMTH642/CMTH642_Assignments/Assignment2'
 BIG_FILE_PATH = '/Users/christophergraham/Documents/Code/kaggle/handwriting'
-SMALL_TEST = 'pendigits.tes.csv'
-SMALL_TRAIN = 'pendigits.tra.csv'
+SMALL_TEST = 'small_test.csv'
+SMALL_TRAIN = 'small_train.csv'
 BIG_TEST = 'test.csv'
 BIG_TRAIN = 'train.csv'
 SEED = 234513
@@ -36,19 +35,41 @@ class SimpleNetwork:
         self._value = value
         np.random.seed(SEED)
         SEED = int(SEED*1.2)
-        self._array = np.random.randn(width, length)
+        # This sets values as normal random, mu=0, sigma=1
+        # maybe want to change this?
+        self._array = np.random.randn(width * length)
         # plot_digit(self._array)
 
     def update_vals(self, update_array):
         self._array += update_array
 
+    def compute_distance(self, image):
+        """
+        Computes distance between self and a test image.
+        Returns scalar value
+        :param image: numpy array
+        :return total_dist: scalar
+        """
+        diffs = image - self._array
+        total_dist = np.sqrt(np.sum(diffs**2))
+        return total_dist
 
-def load_big_images():
+    def get_value(self):
+        return self._value
+
+
+def load_big_images(size):
     """
     Create 3 numpy arrays: test data (paramaters only)
         train data (one for paramaters, one for values)
     :return:
     """
+    if size == 'BIG':
+        train_file = BIG_TRAIN
+        test_file = BIG_TEST
+    else:
+        train_file = SMALL_TRAIN
+        test_file = SMALL_TEST
     curr_dir = os.getcwd()
     os.chdir(BIG_FILE_PATH)
     train = pd.read_csv(BIG_TRAIN)
@@ -86,7 +107,7 @@ def learn_one_image(images_learned, image_features, image_value, lam_val):
         pass
 
 
-def learn_images(images_learned, features, values, count, lam_val):
+def learn_images(images_learned, features, values, num_tests, lam_val):
     """
     Go through number of example images specified by count and update
     images learned as follows
@@ -98,7 +119,16 @@ def learn_images(images_learned, features, values, count, lam_val):
     :return:
     """
     # TODO: Consider whether to put in a convergence value rather than count
-    pass
+    for i in range(num_tests):
+        nearest = float('inf')
+        pred = 99
+        for image in images_learned:
+            img_distance = image.compute_distance(features[i])
+            if img_distance < nearest:
+                nearest = img_distance
+                pred = image.get_value()
+        # TODO: need to update dictionary appropriately here
+
 
 
 def analyze_pictures():
@@ -106,11 +136,12 @@ def analyze_pictures():
     Main wrapper routine
     :return:
     """
-    # params_train, values_train, params_test = load_big_images()
+    params_train, values_train, params_test = load_big_images('SMALL')
     # TODO: Decide if this should be a dictionary or list
     images_learned = {}
     for val in range(10):
         images_learned[val] = SimpleNetwork(28, 28, val)
+    print(images_learned[0].compute_distance(params_train[0]))
 
 
 if __name__ == '__main__':
